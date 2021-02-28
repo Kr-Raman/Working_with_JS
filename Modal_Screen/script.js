@@ -9,7 +9,19 @@ const overlay = document.querySelector(".overlay");
 const btnsShowModal = document.querySelectorAll(".show-modal");
 const btnCloseModal = document.querySelector(".close-modal");
 
-//console.log(btnsShowModal);
-// for (let i = 0; i < btnsShowModal.length; i++) {
-//   console.log(btnsShowModal[i].textContent);
-// }
+const OpenModal = function () {
+  // Now here we are just removing the hidden property of the class using the classList method we can remove multiple properties just by using commas,, we can add properties too
+  modal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+};
+const closeModal = function () {
+  modal.classList.add("hidden");
+  overlay.classList.add("hidden");
+};
+// We have to use for loop becuz there are 3 buttons with the same class name
+for (let i = 0; i < btnsShowModal.length; i++) {
+  btnsShowModal[i].addEventListener("click", OpenModal);
+}
+
+btnCloseModal.addEventListener("click", closeModal);
+overlay.addEventListener("click", closeModal);
