@@ -100,31 +100,39 @@ const createUsernames = function (accs) {
 createUsernames(accounts);
 //console.log(accounts);
 
-const calcDisplayBalance = function (movements) {
-  const balance = movements.reduce((acc, mov) => acc + mov, 0);
-  labelBalance.textContent = `${balance}💲`;
+const calcDisplayBalance = function (acc) {
+  acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${acc.balance}💲`;
 };
 //calcDisplayBalance(account1.movements);
 // function for creating the total  SUm out and total sum in and the Interest on the deposited money
-const calcDisplaySummary = function (movements) {
-  const incomes = movements
+const calcDisplaySummary = function (acc) {
+  const incomes = acc.movements
     .filter((mov) => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
   labelSumIn.textContent = `${incomes}💲`;
 
-  const out = movements
+  const out = acc.movements
     .filter((mov) => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
   labelSumOut.textContent = `${Math.abs(out)}💲`;
 
-  const interest = movements
+  const interest = acc.movements
     .filter((mov) => mov > 0)
-    .map((deposit) => (deposit * 1.2) / 100)
+    .map((deposit) => (deposit * acc.interestRate) / 100)
     .reduce((acc, int) => acc + int, 0);
 
   labelSumInterest.textContent = `${interest}💲`;
 };
 //calcDisplaySummary(account1.movements);
+
+//Function for updating UI with changes
+updateUI(acc);
+{
+  displayMovements(acc.movements);
+  calcDisplayBalance(acc);
+  calcDisplaySummary(acc);
+}
 
 //EVENT HANDLER FOR LOGIN
 let currentAccount;
@@ -136,7 +144,7 @@ btnLogin.addEventListener("click", function (e) {
   currentAccount = accounts.find(
     (acc) => acc.username === inputLoginUsername.value
   );
-  //now here we will check whether the username and pin matches or not
+  //now here we will check whether the username and pin matches or not using the OPERATIONAL CHAINING
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
     labelWelcome.textContent = `Welcome back ,${
       currentAccount.owner.split(" ")[0]
@@ -147,12 +155,34 @@ btnLogin.addEventListener("click", function (e) {
   inputLoginPin.blur();
   // changing the opactiy property
   containerApp.style.opacity = 100;
+
   // making all the display Dynamic here
-  displayMovements(currentAccount.movements);
-  calcDisplayBalance(currentAccount.movements);
-  calcDisplaySummary(currentAccount.movements);
+  updateUI(currentAccount);
 });
 
+//Implementing the Transfer
+btnTransfer.addEventListener("click", function (e) {
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find(
+    (acc) => acc.username === inputTransferTo.value
+  );
+  // making the input field for this tranfer block empty after the btn is pushed
+  inputTransferAmount.value = inputTransferTo.value = "";
+
+  if (
+    amount > 0 &&
+    receiverAcc &&
+    currentAccount.balance >= amount &&
+    receiverAcc?.username !== currentAccount.username
+  ) {
+    // console.log("transfer valid");
+    currentAccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+    //updating UI
+    updateUI(currentAccount);
+  }
+});
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
