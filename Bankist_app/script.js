@@ -84,7 +84,7 @@ const displayMovements = function (movements) {
   });
 };
 
-displayMovements(account1.movements);
+//displayMovements(account1.movements);
 
 //Now creating a username for the users that will take the owners name and it will convert it into just the initals
 
@@ -98,13 +98,13 @@ const createUsernames = function (accs) {
   });
 };
 createUsernames(accounts);
-console.log(accounts);
+//console.log(accounts);
 
 const calcDisplayBalance = function (movements) {
   const balance = movements.reduce((acc, mov) => acc + mov, 0);
   labelBalance.textContent = `${balance}💲`;
 };
-calcDisplayBalance(account1.movements);
+//calcDisplayBalance(account1.movements);
 // function for creating the total  SUm out and total sum in and the Interest on the deposited money
 const calcDisplaySummary = function (movements) {
   const incomes = movements
@@ -124,7 +124,35 @@ const calcDisplaySummary = function (movements) {
 
   labelSumInterest.textContent = `${interest}💲`;
 };
-calcDisplaySummary(account1.movements);
+//calcDisplaySummary(account1.movements);
+
+//EVENT HANDLER FOR LOGIN
+let currentAccount;
+btnLogin.addEventListener("click", function (e) {
+  //by default we know that submit btn refreshes the page which clicked upon and
+  //here we are preventing it for doing its default refreshing habit.
+  e.preventDefault();
+  //this will give us the account to which the username belongs .
+  currentAccount = accounts.find(
+    (acc) => acc.username === inputLoginUsername.value
+  );
+  //now here we will check whether the username and pin matches or not
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    labelWelcome.textContent = `Welcome back ,${
+      currentAccount.owner.split(" ")[0]
+    } `;
+  }
+  //clearing the input fields
+  inputLoginPin.value = inputLoginUsername.value = "";
+  inputLoginPin.blur();
+  // changing the opactiy property
+  containerApp.style.opacity = 100;
+  // making all the display Dynamic here
+  displayMovements(currentAccount.movements);
+  calcDisplayBalance(currentAccount.movements);
+  calcDisplaySummary(currentAccount.movements);
+});
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
