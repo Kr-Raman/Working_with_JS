@@ -120,6 +120,10 @@ const calcDisplaySummary = function (acc) {
   const interest = acc.movements
     .filter((mov) => mov > 0)
     .map((deposit) => (deposit * acc.interestRate) / 100)
+    .filter((int, i, arr) => {
+      // console.log(arr);
+      return int >= 1;
+    })
     .reduce((acc, int) => acc + int, 0);
 
   labelSumInterest.textContent = `${interest}💲`;
@@ -127,12 +131,11 @@ const calcDisplaySummary = function (acc) {
 //calcDisplaySummary(account1.movements);
 
 //Function for updating UI with changes
-updateUI(acc);
-{
+const updateUI = function (acc) {
   displayMovements(acc.movements);
   calcDisplayBalance(acc);
   calcDisplaySummary(acc);
-}
+};
 
 //EVENT HANDLER FOR LOGIN
 let currentAccount;
@@ -145,16 +148,16 @@ btnLogin.addEventListener("click", function (e) {
     (acc) => acc.username === inputLoginUsername.value
   );
   //now here we will check whether the username and pin matches or not using the OPERATIONAL CHAINING
-  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+  if (currentAccount && currentAccount.pin === Number(inputLoginPin.value)) {
     labelWelcome.textContent = `Welcome back ,${
       currentAccount.owner.split(" ")[0]
     } `;
+    // changing the opactiy property
+    containerApp.style.opacity = 100;
   }
   //clearing the input fields
   inputLoginPin.value = inputLoginUsername.value = "";
   inputLoginPin.blur();
-  // changing the opactiy property
-  containerApp.style.opacity = 100;
 
   // making all the display Dynamic here
   updateUI(currentAccount);
@@ -182,6 +185,27 @@ btnTransfer.addEventListener("click", function (e) {
     //updating UI
     updateUI(currentAccount);
   }
+});
+
+// Implementing the Close Account functionality
+
+btnClose.addEventListener("click", function (e) {
+  e.preventDefault();
+  if (
+    inputCloseUsername.value === currentAccount.username &&
+    Number(inputClosePin.value) === currentAccount.pin
+  ) {
+    const index = accounts.findIndex(
+      (acc) => acc.username === currentAccount.username
+    );
+    console.log(index);
+    //deleting the Node
+    accounts.splice(index, 1);
+    //Hiding the UI just to show that the account has been deleted
+    console.log(accounts);
+    containerApp.style.opacity = 0;
+  }
+  inputCloseUsername.value = inputClosePin.value = "";
 });
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
