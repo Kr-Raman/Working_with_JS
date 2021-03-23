@@ -63,10 +63,12 @@ const inputClosePin = document.querySelector(".form__input--pin");
 
 // for making the deposit history box we need to iterate the entire Object movements
 
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
   // removing the already existing Elements
   containerMovements.innerHTML = "";
-  movements.forEach(function (mov, i) {
+  //sorting the movements
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  movs.movements.forEach(function (mov, i) {
     // to know whether the deposit or withdrawl using ternary operator
     const type = mov > 0 ? "deposit" : "withdrawal";
     // here we are creating a html template leteral i.e making html code dynamic in nature
@@ -77,7 +79,7 @@ const displayMovements = function (movements) {
       i + 1
     } ${type}</div>
          
-          <div class="movements__value">${mov}💲</div>
+          <div class="movements__value">${mov.toFixed(2)}💲</div>
         </div>
     `;
     containerMovements.insertAdjacentHTML("afterbegin", html);
@@ -102,7 +104,7 @@ createUsernames(accounts);
 
 const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
-  labelBalance.textContent = `${acc.balance}💲`;
+  labelBalance.textContent = `${acc.balance.toFixed(2)}💲`;
 };
 //calcDisplayBalance(account1.movements);
 // function for creating the total  SUm out and total sum in and the Interest on the deposited money
@@ -110,12 +112,12 @@ const calcDisplaySummary = function (acc) {
   const incomes = acc.movements
     .filter((mov) => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumIn.textContent = `${incomes}💲`;
+  labelSumIn.textContent = `${incomes.toFixed(2)}💲`;
 
   const out = acc.movements
     .filter((mov) => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumOut.textContent = `${Math.abs(out)}💲`;
+  labelSumOut.textContent = `${Math.abs(out).toFixed(2)}💲`;
 
   const interest = acc.movements
     .filter((mov) => mov > 0)
@@ -126,7 +128,7 @@ const calcDisplaySummary = function (acc) {
     })
     .reduce((acc, int) => acc + int, 0);
 
-  labelSumInterest.textContent = `${interest}💲`;
+  labelSumInterest.textContent = `${interest.toFixed(2)}💲`;
 };
 //calcDisplaySummary(account1.movements);
 
@@ -148,7 +150,7 @@ btnLogin.addEventListener("click", function (e) {
     (acc) => acc.username === inputLoginUsername.value
   );
   //now here we will check whether the username and pin matches or not using the OPERATIONAL CHAINING
-  if (currentAccount && currentAccount.pin === Number(inputLoginPin.value)) {
+  if (currentAccount && currentAccount.pin === +inputLoginPin.value) {
     labelWelcome.textContent = `Welcome back ,${
       currentAccount.owner.split(" ")[0]
     } `;
@@ -166,7 +168,7 @@ btnLogin.addEventListener("click", function (e) {
 //Implementing the Transfer
 btnTransfer.addEventListener("click", function (e) {
   e.preventDefault();
-  const amount = Number(inputTransferAmount.value);
+  const amount = +inputTransferAmount.value;
   const receiverAcc = accounts.find(
     (acc) => acc.username === inputTransferTo.value
   );
@@ -193,7 +195,7 @@ btnClose.addEventListener("click", function (e) {
   e.preventDefault();
   if (
     inputCloseUsername.value === currentAccount.username &&
-    Number(inputClosePin.value) === currentAccount.pin
+    +inputClosePin.value === currentAccount.pin
   ) {
     const index = accounts.findIndex(
       (acc) => acc.username === currentAccount.username
@@ -204,6 +206,7 @@ btnClose.addEventListener("click", function (e) {
     //Hiding the UI just to show that the account has been deleted
     console.log(accounts);
     containerApp.style.opacity = 0;
+    labelWelcome.textContent = `Account deleted`;
   }
   inputCloseUsername.value = inputClosePin.value = "";
 });
@@ -211,7 +214,7 @@ btnClose.addEventListener("click", function (e) {
 btnLoan.addEventListener("click", function (e) {
   e.preventDefault();
 
-  const amount = Number(inputLoanAmount.value);
+  const amount = Math.floor(inputLoanAmount.value);
 
   if (
     amount > 0 &&
@@ -221,6 +224,13 @@ btnLoan.addEventListener("click", function (e) {
     updateUI(currentAccount);
   }
   inputLoanAmount.value = "";
+});
+//implementing sorting functionality
+let sorted = false;
+btnSort.addEventListener("click", function (e) {
+  e.preventDefault();
+  displayMovements(currentAccount.movements, !sorted);
+  sorted = !sorted;
 });
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
